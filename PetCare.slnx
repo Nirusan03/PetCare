@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="PetCare.API/PetCare.API.csproj" Id="bc82536c-11b8-4a5e-a207-fb739fb740de" />
+  <Project Path="PetCare.MAUI/PetCare.MAUI.csproj" Id="ae3e1425-29d0-4c55-8738-15582b642d61" />
+  <Project Path="PetCare.Shared/PetCare.Shared.csproj" />
+</Solution>
