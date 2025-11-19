@@ -2,10 +2,10 @@
 using System.ComponentModel.DataAnnotations.Schema;
 namespace PetCare.Shared
 {
-    internal class PetSharedAccess
+    public class PetSharedAccess
     {
         [Key]
-        public int ShareID { get; set; }
+        public int ShareId { get; set; }
 
         public int PetId { get; set; }
         [ForeignKey("PetId")]
@@ -13,7 +13,7 @@ namespace PetCare.Shared
 
         public int OwnerUserId { get; set; }
         [ForeignKey("OwnerUserId")]
-        public User ? OwnerUser { get; set; }
+        public User ? Owner { get; set; }
 
         [Required]
         [MaxLength(100)]

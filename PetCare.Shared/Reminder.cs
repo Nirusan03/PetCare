@@ -2,10 +2,10 @@
 using System.ComponentModel.DataAnnotations.Schema;
 namespace PetCare.Shared
 {
-    internal class CareLogs
+    public class Reminder
     {
         [Key]
-        public int CareLogId { get; set; }
+        public int ReminderId { get; set; }
 
         public int PetId { get; set; }
         [ForeignKey("PetId")]
@@ -16,16 +16,17 @@ namespace PetCare.Shared
         public User? User { get; set; }
 
         [Required]
+        [MaxLength(200)]
+        public string Title { get; set; }
+
+        public string Description { get; set; }
+
+        public DateTime RemindAt { get; set; }
+
+        [Required]
         [MaxLength(50)]
-        public string Type { get; set; }
+        public string Repeat { get; set; }
 
-        [Required]
-        public DateTime TimeStamp { get; set; }
-
-        public string Details { get; set; }
-
-        [Required]
-        [MaxLength(500)]
-        public string PhotoUrl { get; set; }
+        public int IsSent { get; set; } = 0;
     }
 }

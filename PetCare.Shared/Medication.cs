@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PetCare.Shared
 {
-    internal class Medication
+    public class Medication
     {
         [Key]
-        public int MedicitationID;
+        public int MedicationId;
 
         public int PetId;
         [ForeignKey("PetId")]
@@ -18,7 +18,7 @@ namespace PetCare.Shared
 
         [Required]
         [MaxLength(100)]
-        public string Dossage { get; set; }
+        public string Dosage { get; set; }
 
         [Required]
         [MaxLength(100)]

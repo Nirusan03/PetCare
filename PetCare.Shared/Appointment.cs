@@ -3,14 +3,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PetCare.Shared
 {
-    internal class Appointment
+    public class Appointment
     {
         [Key]
         public int AppointmentId { get; set; }
 
         public int PetId { get; set; }
         [ForeignKey("PetId")]
-        public Pet ? Pets { get; set; }
+        public Pet ? Pet { get; set; }
 
         public int UserId { get; set; }
         [ForeignKey("UserId")]
@@ -30,7 +30,7 @@ namespace PetCare.Shared
         [Required]
         public DateTime EndDateTime { get; set; }
 
-        public string Text { get; set; }
+        public string Notes { get; set; }
 
         [Required]
         [MaxLength(20)]

@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 namespace PetCare.Shared
 {
-    internal class Pet
+    public class Pet
     {
         [Key]
         public int PetId { get; set; }
