@@ -24,6 +24,9 @@ namespace PetCare.Shared
         public string Breed { get; set; }
 
         [Required]
+        public DateTime DOB { get; set; }
+
+        [Required]
         [MaxLength(10)]
         public string Sex { get; set; }
 

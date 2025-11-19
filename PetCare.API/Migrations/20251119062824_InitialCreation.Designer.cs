@@ -12,7 +12,7 @@ using PetCare.API.Data;
 namespace PetCare.API.Migrations
 {
     [DbContext(typeof(AddDbContext))]
-    [Migration("20251119051154_InitialCreation")]
+    [Migration("20251119062824_InitialCreation")]
     partial class InitialCreation
     {
         /// <inheritdoc />
@@ -171,6 +171,9 @@ namespace PetCare.API.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("DOB")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");

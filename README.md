@@ -1,4 +1,109 @@
-﻿# Pet Care App
+﻿# PetCare App - Database Layer & Stored Procedures
+
+##  Overview
+
+This document details the "Step 2" checkpoint of the Pet Care Application development. It covers the establishment of the SQL Server database using a **Hybrid Approach**:
+
+1. **Entity Framework Core (Code-First):** Used to define and create the database tables based on C# models.
+2. **SQL Stored Procedures:** Used to centralize business logic, complex queries, and atomic transactions.
+
+---
+
+## 1. Database Schema (The Tables)
+
+The database schema was generated automatically via the `InitialCreation` migration based on the C# models in the `PetCare.Shared` project.
+
+| Table Name           | C# Model          | Purpose                   | Key Relationships                            |
+| :------------------- | :---------------- | :------------------------ | :------------------------------------------- |
+| **Users**            | `User`            | Authentication & Identity | One User has many Pets.                      |
+| **Pets**             | `Pet`             | Core Profile Data         | Belongs to User; Has many Appointments/Meds. |
+| **Appointments**     | `Appointment`     | Vet visits, grooming      | Links User + Pet.                            |
+| **Medication**       | `Medication`      | Prescriptions & Health    | Links to Pet.                                |
+| **CareLogs**         | `CareLog`         | Daily activity tracking   | Links User + Pet.                            |
+| **Reminders**        | `Reminder`        | Notifications             | Links User + Pet.                            |
+| **PetsSharedAccess** | `PetSharedAccess` | Co-ownership logic        | Links Owner + SharedUser + Pet.              |
+
+---
+
+##  2. Stored Procedures (The Logic)
+
+To ensure performance and security, raw SQL was injected into the EF Core migration pipeline. This allows version-controlled Stored Procedures to stay aligned with the codebase.
+
+### Migration File: `AddStoredProcedures.cs`
+
+* **Migration Name:** `AddStoredProcedures`
+* **Strategy:** Uses `migrationBuilder.Sql()` to inject `CREATE PROCEDURE` statements.
+
+###  Full Implementation Code
+
+```csharp
+<PLACEHOLDER_FOR_FULL_CODE_BLOCK>
+```
+
+---
+
+##  3. How to Apply Changes
+
+Use the Package Manager Console in Visual Studio:
+
+### Step 1 — Set Default Project
+
+Ensure **PetCare.API** is selected in the dropdown.
+
+### Step 2 — Run Migration
+
+```powershell
+Update-Database
+```
+
+### What Happens During Update-Database?
+
+* EF checks `__EFMigrationsHistory`.
+* Runs **InitialCreation** → Creates tables.
+* Runs **AddStoredProcedures** → Creates stored procedures.
+
+---
+
+##  4. Verification Checklist
+
+Open **SQL Server Management Studio (SSMS)**:
+
+###  Tables
+
+Navigate to:
+
+```
+Databases → PetCareDb → Tables
+```
+
+You should see:
+
+* dbo.Pets
+* dbo.Medication
+* dbo.Appointments
+* dbo.Users
+* etc.
+
+###  Stored Procedures
+
+Navigate to:
+
+```
+PetCareDb → Programmability → Stored Procedures
+```
+
+You should see **16 stored procedures**, such as:
+
+* dbo.sp_AddPet
+* dbo.sp_GetPetsByUser
+* dbo.sp_GetPetDetails
+* ...
+
+---
+
+If you want, I can now **replace the placeholder with the full stored procedure code block** or merge this into the previous README.md in a single consolidated file.
+
+# Pet Care App
 
 ### Cross-Platform Mobile Application (MAUI Blazor Hybrid) with .NET Web API Backend
 
@@ -264,7 +369,7 @@ Remove-Migration
 
 ---
 
-## ✅ Project Setup Complete
+##  Project Setup Complete
 
 Your Pet Care App baseline environment is now ready with:
 

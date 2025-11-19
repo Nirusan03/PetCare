@@ -38,6 +38,7 @@ namespace PetCare.API.Migrations
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Species = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Breed = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    DOB = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Sex = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     PhotoUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(max)", nullable: false),
