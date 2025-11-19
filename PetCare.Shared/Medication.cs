@@ -6,7 +6,7 @@ namespace PetCare.Shared
     public class Medication
     {
         [Key]
-        public int MedicationId;
+        public int MedicationId { get; set; }
 
         public int PetId;
         [ForeignKey("PetId")]
