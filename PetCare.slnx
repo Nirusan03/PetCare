@@ -1,7 +1,7 @@
 <Solution>
   <Folder Name="/Solution Items/" />
   <Project Path="PetCare.API/PetCare.API.csproj" Id="bc82536c-11b8-4a5e-a207-fb739fb740de" />
-  <Project Path="PetCare.MAUI/PetCare.MAUI.csproj" Id="24529c42-4408-476e-87fb-7e3c55c5e709">
+  <Project Path="PetCare.MAUI/PetCare.MAUI.csproj" Id="5e018385-f5ff-4974-82df-defa62c3858f">
     <Deploy />
   </Project>
   <Project Path="PetCare.Shared/PetCare.Shared.csproj" />
