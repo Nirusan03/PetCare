@@ -1,5 +1,36 @@
 ﻿@page "/"
+@using PetCare.MAUI.Services
+@inject UserState UserState
+@implements IDisposable
 
-<h1>Hello, world!</h1>
+<h1>Pet Care Dashboard</h1>
 
-Welcome to your new app.
+@if (string.IsNullOrEmpty(UserState.Email))
+{
+    <p>You are not logged in.</p>
+    <a href="/login" class="btn btn-primary">Go to Login</a>
+}
+else
+{
+    <p>Welcome back, <strong>@UserState.Email</strong>!</p>
+    <button class="btn btn-danger" @onclick="Logout">Logout</button>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Subscribe to state changes so the UI updates automatically
+        UserState.OnChange += StateHasChanged;
+    }
+
+    private void Logout()
+    {
+        UserState.Logout();
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe to prevent memory leaks
+        UserState.OnChange -= StateHasChanged;
+    }
+}
