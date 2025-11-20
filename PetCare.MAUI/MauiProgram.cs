@@ -35,6 +35,7 @@ namespace PetCare.MAUI
             builder.Services.AddScoped<IAuthService, AuthService>();
 
             builder.Services.AddScoped<UserState>();
+            builder.Services.AddScoped<IPetService, PetService>();
             return builder.Build();
         }
     }

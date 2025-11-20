@@ -48,7 +48,7 @@
     private async Task HandleLogin()
     {
         isLoading = true;
-        errorMessage = string.Empty;
+        errorMessage = "";
 
         try
         {
@@ -56,10 +56,10 @@
 
             if (response != null && !string.IsNullOrEmpty(response.Token))
             {
-                UserState.SetUser(response.Token, loginModel.Email);
+                UserState.SetUser(response.Token, loginModel.Email, 1);
+
                 NavManager.NavigateTo("/");
             }
-
             else
             {
                 errorMessage = "Invalid email or password.";
@@ -67,7 +67,7 @@
         }
         catch (Exception ex)
         {
-            errorMessage = $"Login failed : {ex.Message}";
+            errorMessage = $"Login failed: {ex.Message}";
         }
         finally
         {

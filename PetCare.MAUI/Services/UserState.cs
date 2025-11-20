@@ -10,13 +10,15 @@ namespace PetCare.MAUI.Services
     {
         public string? AuthToken { get; private set;  }
         public string? Email { get; private set; }
+        public int UserId { get; set; }
 
         public event Action? OnChange;
 
-        public void SetUser(string token, string email)
+        public void SetUser(string token, string email, int userId)
         {
             AuthToken = token;
             Email = email;
+            UserId = userId;
             NotifyStateChanged();
         }
 
@@ -24,6 +26,7 @@ namespace PetCare.MAUI.Services
         {
             AuthToken = null;
             Email = null;
+            UserId = 0;
             NotifyStateChanged();
         }
 
