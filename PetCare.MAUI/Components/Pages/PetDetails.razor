@@ -6,6 +6,7 @@
 @inject UserState UserState
 @inject NavigationManager NavManager
 @inject IMedicationService MedService
+@inject ICareLogService LogService
 
 <div class="container mt-3">
     @if (pet == null)
@@ -153,7 +154,30 @@
             @* --- LOGS TAB --- *@
             @if (activeTab == "logs")
             {
-                <p>Care logs coming next...</p>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4>Care History</h4>
+                    <button class="btn btn-sm btn-primary" @onclick="NavigateToAddLog">+ Add Entry</button>
+                </div>
+
+                @if (careLogs.Count == 0)
+                {
+                    <p class="text-muted border p-3 text-center bg-light rounded">No logs recorded yet.</p>
+                }
+                else
+                {
+                    <div class="list-group shadow-sm">
+                        @foreach (var log in careLogs)
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1 text-primary">@log.Type</h5>
+                                    <small class="text-muted">@log.Timestamp.ToString("MMM dd, HH:mm")</small>
+                                </div>
+                                <p class="mb-1">@log.Details</p>
+                            </div>
+                        }
+                    </div>
+                }
             }
         </div>
     }
@@ -168,13 +192,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        pet = await PetService.GetPetDetailsAsync(PetId);
-        var allApps = await AppointmentService.GetAppointmentsByUserAsync(UserState.UserId);
+        // pet = await PetService.GetPetDetailsAsync(PetId);
+        // var allApps = await AppointmentService.GetAppointmentsByUserAsync(UserState.UserId);
 
         // Filter client-side
-        appointments = allApps.Where(a => a.PetId == PetId)
-                              .OrderBy(a => a.StartedDateTime) // Sorted by StartedDateTime
-                              .ToList();
+        // appointments = allApps.Where(a => a.PetId == PetId)
+        //                       .OrderBy(a => a.StartedDateTime) Sorted by StartedDateTime
+        //                       .ToList();
+        await LoadData();
     }
 
     private void NavigateToAddAppointment()
@@ -208,28 +233,34 @@
     // Add a list to hold meds
     private List<Medication> medications = new();
 
+    // Add this list variable
+    private List<CareLog> careLogs = new();
+
     private async Task LoadData()
     {
         try 
         {
             pet = await PetService.GetPetDetailsAsync(PetId);
             
-            // Appointments logic...
             var allApps = await AppointmentService.GetAppointmentsByUserAsync(UserState.UserId);
             appointments = allApps.Where(a => a.PetId == PetId).OrderBy(a => a.StartedDateTime).ToList();
-
-            // --- NEW: Load Medications ---
             medications = await MedService.GetMedicationsAsync(PetId);
+            careLogs = await LogService.GetLogsAsync(PetId);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error: {ex.Message}");
         }
     }
-
+    
     private void NavigateToAddMedication()
     {
         NavManager.NavigateTo($"/add-medication/{PetId}");
+    }
+
+    private void NavigateToAddLog()
+    {
+        NavManager.NavigateTo($"/add-log/{PetId}");
     }
 
     private async Task StopMedication(int medId)

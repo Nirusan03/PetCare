@@ -28,7 +28,7 @@ namespace PetCare.MAUI
             }
             else
             {
-                baseUrl = "https://localhost:5214";
+                baseUrl = "http://localhost:5214";
             }
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(baseUrl) });
@@ -38,6 +38,8 @@ namespace PetCare.MAUI
             builder.Services.AddScoped<IPetService, PetService>();
             builder.Services.AddScoped<IAppointmentService, AppointmentService>();
             builder.Services.AddScoped<IMedicationService, MedicationService>();
+            builder.Services.AddScoped<ICareLogService, CareLogService>();
+            //builder.Services.AddScoped<>
             return builder.Build();
         }
     }

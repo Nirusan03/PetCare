@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using PetCare.API.Data;
 using PetCare.Shared;
 using PetCare.Shared.DTOs;
+using System.Security.Claims;
 
 namespace PetCare.API.Controllers
 {
@@ -35,12 +36,25 @@ namespace PetCare.API.Controllers
         [HttpPost]
         public async Task<IActionResult> AddLog(CreateCareLogDto dto)
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            int userId = 1;
+
+            if(userIdClaim != null && int.TryParse(userIdClaim.Value, out int parseId))
+            {
+                userId = parseId;
+            }
+
+            string safeNotes = dto.Notes ?? "";
+            string safePhoto = "";
+
             await _context.Database.ExecuteSqlRawAsync(
-                "EXEC sp_AddCareLog @PetId, @ActivityType, @Notes, @LogDate",
+                "EXEC sp_AddCareLog @PetId, @UserId, @Type, @Timestamp, @Details, @PhotoUrl",
                 new SqlParameter("@PetId", dto.PetId),
-                new SqlParameter("@ActivityType", dto.ActivityType),
-                new SqlParameter("@Notes", dto.Notes ?? (object)DBNull.Value),
-                new SqlParameter("@LogDate", dto.LogDate)
+                new SqlParameter("@UserId", userId),
+                new SqlParameter("@Type", dto.ActivityType ?? "General"),
+                new SqlParameter("@Timestamp", dto.LogDate),
+                new SqlParameter("@Details", safeNotes),
+                new SqlParameter("@PhotoUrl", safePhoto)
             );
 
             return Ok(new { Message = "Care log saved." });

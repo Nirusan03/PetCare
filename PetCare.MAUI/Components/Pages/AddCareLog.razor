@@ -1,0 +1,71 @@
+﻿@page "/add-log/{PetId:int}"
+@using PetCare.Shared.DTOs
+@using PetCare.MAUI.Services
+@inject ICareLogService LogService
+@inject NavigationManager NavManager
+
+<div class="container mt-4">
+    <h3>Add Care Log</h3>
+
+    <EditForm Model="@logModel" OnValidSubmit="HandleSave">
+        <DataAnnotationsValidator />
+        
+        <div class="mb-3">
+            <label class="form-label">Activity Type</label>
+            <InputSelect @bind-Value="logModel.ActivityType" class="form-control">
+                <option value="Food">Feeding</option>
+                <option value="Water">Water Refill</option>
+                <option value="Walk">Walk</option>
+                <option value="Grooming">Grooming</option>
+                <option value="Meds">Medication Given</option>
+                <option value="Incident">Health Incident</option>
+                <option value="Other">Other</option>
+            </InputSelect>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Date & Time</label>
+            <InputDate @bind-Value="logModel.LogDate" Type="InputDateType.DateTimeLocal" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Notes / Details</label>
+            <InputTextArea @bind-Value="logModel.Notes" class="form-control" rows="4" placeholder="Describe what happened..." />
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary px-4">Save Log</button>
+            <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] public int PetId { get; set; }
+    private CreateCareLogDto logModel = new CreateCareLogDto();
+
+    protected override void OnInitialized()
+    {
+        logModel.PetId = PetId;
+        logModel.LogDate = DateTime.Now;
+        logModel.ActivityType = "Food"; // Default selection
+    }
+
+    private async Task HandleSave()
+    {
+        var success = await LogService.AddLogAsync(logModel);
+        if (success)
+        {
+            NavManager.NavigateTo($"/pet/{PetId}");
+        }
+        else
+        {
+            await Application.Current.MainPage.DisplayAlert("Error", "Failed to save log.", "OK");
+        }
+    }
+
+    private void Cancel()
+    {
+        NavManager.NavigateTo($"/pet/{PetId}");
+    }
+}
