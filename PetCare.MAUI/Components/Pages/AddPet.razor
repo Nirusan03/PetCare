@@ -1,0 +1,135 @@
+@page "/add-pet"
+@using PetCare.Shared.DTOs
+@using PetCare.MAUI.Services
+@inject IPetService PetService
+@inject UserState UserState
+@inject NavigationManager NavManager
+
+<div class="container mt-4">
+    <h3>Add a New Pet</h3>
+
+    <EditForm Model="@petModel" OnValidSubmit="HandleAddPet">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        @* --- ROW 1: Name & Species --- *@
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Pet Name</label>
+                <InputText @bind-Value="petModel.Name" class="form-control" placeholder="e.g. Buddy" />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Species</label>
+                <InputSelect @bind-Value="petModel.Species" class="form-control">
+                    <option value="">Select...</option>
+                    <option value="Dog">Dog</option>
+                    <option value="Cat">Cat</option>
+                    <option value="Bird">Bird</option>
+                    <option value="Other">Other</option>
+                </InputSelect>
+            </div>
+        </div>
+
+        @* --- ROW 2: Breed & Sex --- *@
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Breed</label>
+                <InputText @bind-Value="petModel.Breed" class="form-control" placeholder="e.g. Golden Retriever" />
+            </div>
+             <div class="col-md-6 mb-3">
+                <label class="form-label">Sex</label>
+                <InputSelect @bind-Value="petModel.Sex" class="form-control">
+                    <option value="">Select...</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </InputSelect>
+            </div>
+        </div>
+
+        @* --- ROW 3: DOB --- *@
+        <div class="mb-3">
+            <label class="form-label">Date of Birth</label>
+            <InputDate @bind-Value="petModel.DOB" class="form-control" />
+        </div>
+
+        @* --- ROW 4: PHOTO URL (New Feature) --- *@
+        <div class="mb-3 card p-3 bg-light">
+            <label class="form-label fw-bold">Pet Photo</label>
+            
+            <div class="input-group mb-2">
+                <InputText @bind-Value="petModel.PhotoUrl" class="form-control" placeholder="Paste an image URL here..." />
+                <button type="button" class="btn btn-info text-white" @onclick="GenerateRandomPhoto"> Random</button>
+            </div>
+            
+            @if (!string.IsNullOrEmpty(petModel.PhotoUrl))
+            {
+                <div class="text-center mt-2">
+                    <p class="text-muted small">Preview:</p>
+                    <img src="@petModel.PhotoUrl" class="rounded-circle shadow-sm" 
+                         style="width: 100px; height: 100px; object-fit: cover; border: 3px solid white;" 
+                         onerror="this.src='https://via.placeholder.com/100?text=Error';"/>
+                </div>
+            }
+        </div>
+
+        @* --- ROW 5: Notes --- *@
+        <div class="mb-3">
+            <label class="form-label">Notes</label>
+            <InputTextArea @bind-Value="petModel.Notes" class="form-control" rows="3" placeholder="Any medical history or details..." />
+        </div>
+
+        @* --- ACTIONS --- *@
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-success px-4">Save Pet</button>
+            <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private CreatePetDto petModel = new CreatePetDto();
+
+    protected override void OnInitialized()
+    {
+        petModel.DOB = DateTime.Today.AddYears(-1);
+        
+        // Link to User
+        petModel.UserId = UserState.UserId > 0 ? UserState.UserId : 1;
+    }
+
+    private void GenerateRandomPhoto()
+    {
+        // Simple logic to pick a random dog or cat image based on selection
+        var random = new Random();
+        int randomId = random.Next(1, 100);
+
+        if (petModel.Species == "Cat")
+        {
+            petModel.PhotoUrl = $"https://placekitten.com/200/200?image={randomId}";
+        }
+        else 
+        {
+            // Default to Dog
+            petModel.PhotoUrl = $"https://placedog.net/500/500?id={randomId}";
+        }
+    }
+
+    private async Task HandleAddPet()
+    {
+        var success = await PetService.AddPetAsync(petModel);
+        
+        if (success)
+        {
+            NavManager.NavigateTo("/");
+        }
+        else
+        {
+            await Application.Current.MainPage.DisplayAlert("Error", "Could not add pet. Check database logs.", "OK");
+        }
+    }
+
+    private void Cancel()
+    {
+        NavManager.NavigateTo("/");
+    }
+}

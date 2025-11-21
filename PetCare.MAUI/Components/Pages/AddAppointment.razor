@@ -1,0 +1,70 @@
+﻿@page "/add-appointment/{PetId:int}"
+@using PetCare.Shared.DTOs
+@using PetCare.MAUI.Services
+@inject IAppointmentService AppointmentService
+@inject NavigationManager NavManager
+
+<div class="container">
+    <h3>Schedule Appointment</h3>
+
+    <EditForm Model="@apptModel" OnValidSubmit="HandleSave">
+        <DataAnnotationsValidator />
+
+        @* TITLE *@
+        <div class="mb-3">
+            <label>Title (e.g. Vet Visit, Grooming)</label>
+            <InputText @bind-Value="apptModel.Title" class="form-control" />
+        </div>
+
+        @* LOCATION *@
+        <div class="mb-3">
+            <label>Location / Provider</label>
+            <InputText @bind-Value="apptModel.Location" class="form-control" />
+        </div>
+
+        @* DATE & TIME *@
+        <div class="mb-3">
+            <label>Date & Time</label>
+            <InputDate @bind-Value="apptModel.AppointmentTime" Type="InputDateType.DateTimeLocal" class="form-control" />
+        </div>
+
+        @* DESCRIPTION *@
+        <div class="mb-3">
+            <label>Description</label>
+            <InputTextArea @bind-Value="apptModel.Description" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Schedule</button>
+        <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] public int PetId { get; set; }
+
+    // Using your DTO class name exactly as provided
+    private CreatAppointmentDto apptModel = new CreatAppointmentDto();
+
+    protected override void OnInitialized()
+    {
+        apptModel.PetId = PetId;
+        apptModel.AppointmentTime = DateTime.Now.AddDays(1); // Default to tomorrow
+    }
+
+    private async Task HandleSave()
+    {
+        // Note: We don't set UserId here because your DTO doesn't have it.
+        // The Backend API should automatically extract UserId from the JWT Token.
+
+        var success = await AppointmentService.AddAppointmentAsync(apptModel);
+        if (success)
+        {
+            NavManager.NavigateTo($"/pet/{PetId}");
+        }
+    }
+
+    private void Cancel()
+    {
+        NavManager.NavigateTo($"/pet/{PetId}");
+    }
+}

@@ -72,39 +72,42 @@
 </div>
 
 @code {
+    @code {
     private List<Pet> Pets = new();
     private bool isLoading = false;
 
     protected override async Task OnInitializedAsync()
     {
+        // Subscribe to state changes so the UI updates when you log in/out
         UserState.OnChange += StateHasChanged;
         await LoadPets();
     }
 
     private async Task LoadPets()
     {
+        // Ensure we have a user logged in
         if (!string.IsNullOrEmpty(UserState.Email))
         {
             isLoading = true;
-            // We need the UserId. For now, we might need to store it in UserState or fetch it.
-            // Quick fix: If your API needs UserId, we'll need to extract it from the Token or store it on Login.
-            // For this step, I'll assume your API has an endpoint "api/Pets/my-pets" OR we pass a placeholder if not stored.
 
-            // NOTE: You'll need to update UserState to store UserId from the Login response!
-            // For now, let's try fetching for ID 1 or update UserState.
-            // Ideally: var userId = UserState.UserId;
-
-            // Temporary Helper: If you haven't updated UserState to hold ID,
-            // we might need to fetch "User Details" first.
-            // Let's assume for this test you are User 1 (or the ID returned in Login).
-
-            // FIX: Let's rely on the LoginResponse having the ID.
-            // If you strictly follow the PDF, we need to pass UserId.
-            // Since I don't have your UserState updated yet, I will use a hardcoded '1' for testing
-            // UNLESS you update UserState.cs to add "public int UserId { get; set; }"
-
-            await Task.Delay(100); // Placeholder
-            isLoading = false;
+            try
+            {
+                // CRITICAL FIX: Actually fetch the data from the API!
+                // We use the UserId from UserState. If it's 0 (missing), we fallback to 1 for testing.
+                int userIdToFetch = UserState.UserId > 0 ? UserState.UserId : 1;
+                
+                Pets = await PetService.GetPetsByUserAsync(userIdToFetch);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading pets: {ex.Message}");
+                // Optional: Show an alert if loading fails
+            }
+            finally
+            {
+                isLoading = false;
+                StateHasChanged(); // Refresh the UI
+            }
         }
     }
 
@@ -128,4 +131,5 @@
     {
         UserState.OnChange -= StateHasChanged;
     }
+}
 }

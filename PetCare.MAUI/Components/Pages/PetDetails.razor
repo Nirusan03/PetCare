@@ -1,0 +1,160 @@
+﻿@page "/pet/{PetId:int}"
+@using PetCare.Shared
+@using PetCare.MAUI.Services
+@inject IPetService PetService
+@inject IAppointmentService AppointmentService
+@inject UserState UserState
+@inject NavigationManager NavManager
+
+<div class="container mt-3">
+    @if (pet == null)
+    {
+        <p>Loading pet details...</p>
+    }
+    else
+    {
+        @* Header Section *@
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body d-flex align-items-center">
+                <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center me-4"
+                     style="width:80px;height:80px;font-size:2rem;">
+                    @(pet.Name?.FirstOrDefault())
+                </div>
+                <div>
+                    <h2>@pet.Name</h2>
+                    <p class="text-muted mb-0">@pet.Species • @pet.Breed</p>
+                </div>
+            </div>
+        </div>
+
+        @* Tabs Navigation *@
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "appointments" ? "active" : "")"
+                   @onclick='() => activeTab = "appointments"' style="cursor:pointer">Appointments</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "meds" ? "active" : "")"
+                   @onclick='() => activeTab = "meds"' style="cursor:pointer">Medications</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(activeTab == "logs" ? "active" : "")"
+                   @onclick='() => activeTab = "logs"' style="cursor:pointer">Care Logs</a>
+            </li>
+        </ul>
+
+        @* Tab Content Area *@
+        <div class="tab-content">
+
+            @* --- APPOINTMENTS TAB --- *@
+            @if (activeTab == "appointments")
+            {
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4>Upcoming Appointments</h4>
+                    <button class="btn btn-sm btn-primary" @onclick="NavigateToAddAppointment">+ Schedule</button>
+                </div>
+
+                @if (appointments.Count == 0)
+                {
+                    <p class="text-muted">No appointments scheduled.</p>
+                }
+                else
+                {
+                    <ul class="list-group">
+                        @foreach (var appt in appointments)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    @* Checkbox Logic: Checks if Status is "Completed" *@
+                                    <input type="checkbox" class="form-check-input me-2"
+                                           checked="@(appt.Status == "Completed")"
+                                           @onchange="(e) => ToggleStatus(appt, e)" />
+
+                                    @* CORRECTED FIELDS: Type & Provider *@
+                                    <strong>@appt.Type</strong>
+                                    @if (appt.Status == "Completed")
+                                    {
+                                        <span class="badge bg-success ms-2">Done</span>
+                                    }
+                                    <br />
+                                    <small class="text-muted">
+                                        @* CORRECTED FIELD: StartedDateTime *@
+                                        @appt.StartedDateTime.ToString("MMM dd, yyyy HH:mm")
+                                        @if (!string.IsNullOrEmpty(appt.Provider))
+                                        {
+                                            <span> • @appt.Provider</span>
+                                        }
+                                    </small>
+                                </div>
+
+                                <button class="btn btn-outline-danger btn-sm"
+                                        @onclick="() => DeleteAppt(appt.AppointmentId)">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                }
+            }
+
+            @* --- MEDICATIONS TAB --- *@
+            @if (activeTab == "meds")
+            {
+                <p>Medications list coming next...</p>
+            }
+
+            @* --- LOGS TAB --- *@
+            @if (activeTab == "logs")
+            {
+                <p>Care logs coming next...</p>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int PetId { get; set; }
+
+    private Pet? pet;
+    private List<Appointment> appointments = new();
+    private string activeTab = "appointments";
+
+    protected override async Task OnInitializedAsync()
+    {
+        pet = await PetService.GetPetDetailsAsync(PetId);
+        var allApps = await AppointmentService.GetAppointmentsByUserAsync(UserState.UserId);
+
+        // Filter client-side
+        appointments = allApps.Where(a => a.PetId == PetId)
+                              .OrderBy(a => a.StartedDateTime) // Sorted by StartedDateTime
+                              .ToList();
+    }
+
+    private void NavigateToAddAppointment()
+    {
+        NavManager.NavigateTo($"/add-appointment/{PetId}");
+    }
+
+    private async Task DeleteAppt(int apptId)
+    {
+        bool confirm = await Application.Current.MainPage.DisplayAlert(
+            "Delete Appointment", "Are you sure?", "Yes", "No");
+
+        if (confirm)
+        {
+            await AppointmentService.DeleteAppointmentAsync(apptId);
+            await OnInitializedAsync();
+        }
+    }
+
+    private async Task ToggleStatus(Appointment appt, ChangeEventArgs e)
+    {
+        bool isChecked = (bool)e.Value!;
+
+        // Optimistic Update: Update UI immediately
+        appt.Status = isChecked ? "Completed" : "Scheduled";
+
+        // Call API (which expects a boolean)
+        await AppointmentService.UpdateStatusAsync(appt.AppointmentId, isChecked);
+    }
+}
