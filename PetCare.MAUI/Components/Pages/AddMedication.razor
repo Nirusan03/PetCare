@@ -1,0 +1,69 @@
+﻿@page "/add-medication/{PetId:int}"
+@using PetCare.Shared.DTOs
+@using PetCare.MAUI.Services
+@inject IMedicationService MedService
+@inject NavigationManager NavManager
+
+<div class="container mt-4">
+    <h3>Add Medication</h3>
+
+    <EditForm Model="@medModel" OnValidSubmit="HandleSave">
+        <DataAnnotationsValidator />
+
+        <div class="mb-3">
+            <label>Medication Name</label>
+            <InputText @bind-Value="medModel.Name" class="form-control" placeholder="e.g. Amoxicillin" />
+        </div>
+
+        <div class="mb-3">
+            <label>Dosage</label>
+            <InputText @bind-Value="medModel.Dosage" class="form-control" placeholder="e.g. 1 tablet, 5ml" />
+        </div>
+
+        <div class="mb-3">
+            <label>Frequency</label>
+            <InputText @bind-Value="medModel.Frequency" class="form-control" placeholder="e.g. Twice a day" />
+        </div>
+
+        <div class="mb-3">
+            <label>Start Date</label>
+            <InputDate @bind-Value="medModel.StartDate" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>End Date (Optional)</label>
+            <p class="text-muted small">Leave empty for ongoing meds.</p>
+            <InputDate @bind-Value="medModel.EndDate" class="form-control" />
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">Save Medication</button>
+            <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] public int PetId { get; set; }
+    private CreateMedicationDto medModel = new CreateMedicationDto();
+
+    protected override void OnInitialized()
+    {
+        medModel.PetId = PetId;
+        medModel.StartDate = DateTime.Today;
+    }
+
+    private async Task HandleSave()
+    {
+        var success = await MedService.AddMedicationAsync(medModel);
+        if (success)
+        {
+            NavManager.NavigateTo($"/pet/{PetId}");
+        }
+    }
+
+    private void Cancel()
+    {
+        NavManager.NavigateTo($"/pet/{PetId}");
+    }
+}

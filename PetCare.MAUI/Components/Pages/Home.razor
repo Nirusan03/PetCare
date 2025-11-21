@@ -85,28 +85,26 @@
 
     private async Task LoadPets()
     {
-        // Ensure we have a user logged in
+        // Check if user is logged in (using the property from UserState)
         if (!string.IsNullOrEmpty(UserState.Email))
         {
             isLoading = true;
-
             try
             {
-                // CRITICAL FIX: Actually fetch the data from the API!
-                // We use the UserId from UserState. If it's 0 (missing), we fallback to 1 for testing.
-                int userIdToFetch = UserState.UserId > 0 ? UserState.UserId : 1;
-                
-                Pets = await PetService.GetPetsByUserAsync(userIdToFetch);
+                // 1. Get the UserId from state (fallback to 1 if missing for testing)
+                int userId = UserState.UserId > 0 ? UserState.UserId : 1;
+
+                // 2. REAL API CALL (This was missing in your code)
+                Pets = await PetService.GetPetsByUserAsync(userId);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error loading pets: {ex.Message}");
-                // Optional: Show an alert if loading fails
             }
             finally
             {
                 isLoading = false;
-                StateHasChanged(); // Refresh the UI
+                StateHasChanged(); // Refresh the UI to show the pets
             }
         }
     }

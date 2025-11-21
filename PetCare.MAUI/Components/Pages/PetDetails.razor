@@ -5,6 +5,7 @@
 @inject IAppointmentService AppointmentService
 @inject UserState UserState
 @inject NavigationManager NavManager
+@inject IMedicationService MedService
 
 <div class="container mt-3">
     @if (pet == null)
@@ -100,7 +101,53 @@
             @* --- MEDICATIONS TAB --- *@
             @if (activeTab == "meds")
             {
-                <p>Medications list coming next...</p>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4>Active Medications</h4>
+                    <button class="btn btn-sm btn-primary" @onclick="NavigateToAddMedication">+ Add Meds</button>
+                </div>
+
+                // 1. Filter Active Meds (No EndDate OR EndDate is in future)
+                var activeMeds = medications.Where(m => m.EndDate == null || m.EndDate >= DateTime.Today).ToList();
+
+                if (activeMeds.Count == 0)
+                {
+                    <p class="text-muted">No active medications.</p>
+                }
+                else
+                {
+                    <ul class="list-group mb-4">
+                        @foreach (var med in activeMeds)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>@med.Name</strong>
+                                    <br/>
+                                    <span class="badge bg-info text-dark">@med.Dosage</span>
+                                    <span class="text-muted ms-1">@med.Frequency</span>
+                                </div>
+                                <button class="btn btn-outline-danger btn-sm" @onclick="() => StopMedication(med.MedicationId)">
+                                    Stop
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                }
+
+                // 2. Past Medications
+                var pastMeds = medications.Where(m => m.EndDate < DateTime.Today).ToList();
+                
+                if (pastMeds.Count > 0)
+                {
+                    <h5 class="text-muted mt-4">History</h5>
+                    <ul class="list-group opacity-75">
+                        @foreach (var med in pastMeds)
+                        {
+                            <li class="list-group-item bg-light">
+                                <strong>@med.Name</strong> (Ended: @med.EndDate.Value.ToShortDateString())
+                            </li>
+                        }
+                    </ul>
+                }
             }
 
             @* --- LOGS TAB --- *@
@@ -156,5 +203,44 @@
 
         // Call API (which expects a boolean)
         await AppointmentService.UpdateStatusAsync(appt.AppointmentId, isChecked);
+    }
+
+    // Add a list to hold meds
+    private List<Medication> medications = new();
+
+    private async Task LoadData()
+    {
+        try 
+        {
+            pet = await PetService.GetPetDetailsAsync(PetId);
+            
+            // Appointments logic...
+            var allApps = await AppointmentService.GetAppointmentsByUserAsync(UserState.UserId);
+            appointments = allApps.Where(a => a.PetId == PetId).OrderBy(a => a.StartedDateTime).ToList();
+
+            // --- NEW: Load Medications ---
+            medications = await MedService.GetMedicationsAsync(PetId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    private void NavigateToAddMedication()
+    {
+        NavManager.NavigateTo($"/add-medication/{PetId}");
+    }
+
+    private async Task StopMedication(int medId)
+    {
+        bool confirm = await Application.Current.MainPage.DisplayAlert(
+            "Stop Medication", "Are you sure you want to stop this treatment?", "Yes", "No");
+            
+        if (confirm)
+        {
+            await MedService.StopMedicationAsync(medId);
+            await LoadData(); // Refresh
+        }
     }
 }
